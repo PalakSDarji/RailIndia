@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">RailIndia</string>
+    <string name="enter_bogie_number">Enter Bogie Number</string>
+    <string name="date">Date</string>
+    <string name="of_bogie"># of Bogie</string>
+    <string name="add_data">Add Data</string>
 </resources>

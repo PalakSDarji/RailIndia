@@ -1,13 +1,17 @@
 package com.palak.railindia.di
 
+import android.app.Application
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import com.palak.railindia.db.AppDb
+import com.palak.railindia.db.ComponentDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import java.text.SimpleDateFormat
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
@@ -15,6 +19,17 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 class AppModule {
 
+    @Singleton
+    @Provides
+    fun provideAppDb(application : Application) : AppDb {
+        return AppDb.getDb(application.applicationContext)
+    }
+
+    @Singleton
+    @Provides
+    fun provideComponentDao(appDb : AppDb) : ComponentDao {
+        return appDb.componentDao()
+    }
 
     @Singleton
     @Provides
@@ -29,9 +44,19 @@ class AppModule {
         return firebaseDatabase.getReference("componentData")
     }
 
+    @Singleton
+    @Provides
+    @DateSDF
+    fun provideSdfTime() : SimpleDateFormat {
+        return SimpleDateFormat("dd MMM yyyy")
+    }
 }
 
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ComponentDataRef
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DateSDF
