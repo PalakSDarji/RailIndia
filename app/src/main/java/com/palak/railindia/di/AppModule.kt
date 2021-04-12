@@ -7,6 +7,7 @@ import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.palak.railindia.db.AppDb
 import com.palak.railindia.db.ComponentDao
+import com.palak.railindia.db.EntryDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,6 +30,12 @@ class AppModule {
     @Provides
     fun provideComponentDao(appDb : AppDb) : ComponentDao {
         return appDb.componentDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideEntryDao(appDb: AppDb) : EntryDao {
+        return appDb.entryDao()
     }
 
     @Singleton

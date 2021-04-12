@@ -2,6 +2,10 @@
     <string name="app_name">RailIndia</string>
     <string name="enter_bogie_number">Enter Bogie Number</string>
     <string name="date">Date</string>
-    <string name="of_bogie"># of Bogie</string>
+    <string name="of_bogie"># of Bogie (Default is 1)</string>
     <string name="add_data">Add Data</string>
+    <string name="pass">Pass</string>
+    <string name="fail">Fail</string>
+    <string name="please_fill_data_below_and_save">Please fill data below and Save.</string>
+    <string name="btn_continue">Continue</string>
 </resources>

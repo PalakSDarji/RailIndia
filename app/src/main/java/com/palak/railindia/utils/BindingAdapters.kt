@@ -1,10 +1,22 @@
 package com.palak.railindia.utils
 
+import android.view.View
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
 import java.util.*
+
+
+@BindingAdapter("isGone")
+fun bindIsGone(view: View, isGone: Boolean){
+    view.visibility = if(isGone){
+        View.GONE
+    }
+    else{
+        View.VISIBLE
+    }
+}
 
 @BindingAdapter("date")
 fun setDateToEditText(et : TextInputEditText, date : Date?){

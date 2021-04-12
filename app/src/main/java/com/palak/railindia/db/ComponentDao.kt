@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.palak.railindia.model.Component
+import kotlinx.coroutines.flow.Flow
 
 /**
  * Handler method for db operations.
@@ -15,7 +16,7 @@ interface ComponentDao {
 
     //No need to use suspend, Reason: LiveData will update in async manner.
     @Query("SELECT * from component")
-    fun fetchAllComponent() : LiveData<List<Component>>
+    fun fetchAllComponent() : Flow<List<Component>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertComponent(component : Component) : Long

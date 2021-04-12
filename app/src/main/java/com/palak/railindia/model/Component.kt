@@ -6,8 +6,9 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "component")
 data class Component constructor(
     @PrimaryKey
-    val id : Int = 0,
-    val name : String = "",
-    val qty : Int = 0)
+    var id: Int = 0,
+    var name: String = "",
+    var qty: Int = 0
+)
 
 
