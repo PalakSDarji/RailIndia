@@ -82,6 +82,20 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/layoutBogie" />
 
+
+                <Button
+                    android:id="@+id/btnViewData"
+                    isGone="@{showList}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="50dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="50dp"
+                    android:text="@string/viewData"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/btnContinue" />
+
                 <View
                     android:id="@+id/viewSpace1"
                     isGone="@{!showList}"

@@ -21,7 +21,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.lang.Exception
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,7 +40,8 @@ class HomeFragment : Fragment() {
     private lateinit var binding: HomeFragmentBinding
     private val viewModel by activityViewModels<HomeViewModel>()
 
-    private val entry = Entry()
+    private lateinit var entry : Entry
+    private var noOfBogie : Int = 1
 
     @Inject
     @DateSDF
@@ -65,12 +68,11 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        initViews()
         viewModel.downloadComponentData()
 
         binding.layoutDate.sdf = dateSdf
         binding.homeViewModel = viewModel
-        binding.showList = false
 
         binding.layoutDate.tilDate.editText?.setOnClickListener {
             DatePickerDialog(
@@ -85,12 +87,18 @@ class HomeFragment : Fragment() {
         binding.btnContinue.setOnClickListener {
 
             val date = binding.layoutDate.tilDate.editText?.text.toString().trim()
-            if(date.isEmpty()){
-                Snackbar.make(binding.container,"Enter date!",Snackbar.LENGTH_LONG).show()
+            if (date.isEmpty()) {
+                Snackbar.make(binding.container, "Enter date!", Snackbar.LENGTH_LONG).show()
                 return@setOnClickListener
             }
 
-            it.visibility = View.GONE
+            binding.layoutDate.tilDate.isEnabled = false
+
+            if (binding.layoutBogie.tilBogieNumber.editText?.text.toString().isEmpty()) {
+                binding.layoutBogie.tilBogieNumber.editText?.setText("1")
+            }
+
+            binding.layoutBogie.tilBogieNumber.isEnabled = false
             binding.showList = true
             hideKeyboard()
             initList()
@@ -100,11 +108,55 @@ class HomeFragment : Fragment() {
             //Save to database.
             hideKeyboard()
             Timber.d("Entry : $entry")
-            viewModel.saveEntry(entry)
+
+            if(validate()){
+
+                lifecycleScope.launch {
+
+                    try{
+                        viewModel.saveEntry(entry)
+                        Snackbar.make(binding.container,"Data Added Successfully!", Snackbar.LENGTH_LONG).show()
+                        initViews()
+                    }
+                    catch (e : Exception){
+                        e.printStackTrace()
+                        Snackbar.make(binding.container,"Something went wrong!", Snackbar.LENGTH_LONG).show()
+                    }
+                }
+            }
         }
     }
 
-    private fun initList(){
+    private fun initViews() {
+        entry = Entry()
+        noOfBogie = 1
+        binding.showList = false
+
+        binding.layoutDate.tilDate.editText?.setText("")
+        binding.layoutDate.tilDate.isEnabled = true
+
+        binding.layoutBogie.tilBogieNumber.editText?.setText("")
+        binding.layoutBogie.tilBogieNumber.isEnabled = true
+    }
+
+    private fun validate(): Boolean {
+
+        entry.componentEntry.let {
+            it?.forEach { compEntry ->
+                val qty = compEntry.component?.qty
+                val max = noOfBogie * qty!!
+                if(compEntry.pass + compEntry.fail != max){
+                    Snackbar.make(binding.container,"Please check ${compEntry.component!!.name}", Snackbar.LENGTH_LONG).show()
+                    return false
+                }
+
+            }
+        }
+
+        return true
+    }
+
+    private fun initList() {
         lifecycleScope.launchWhenCreated {
 
             viewModel.componentLiveData.map {
@@ -124,16 +176,43 @@ class HomeFragment : Fragment() {
 
                 val bogieNumberText = binding.layoutBogie.tilBogieNumber.editText?.text.toString()
 
-                var noOfBogie = 1;
+
 
                 if (!bogieNumberText.isEmpty()) {
                     noOfBogie = bogieNumberText.toInt()
                 }
 
-                adapter = ComponentAdapter(noOfBogie, onPassSave = { data, pos ->
-                    componentEntryList.get(pos).pass = data
-                }, onFailSave = { data, pos ->
-                    componentEntryList.get(pos).fail = data
+                adapter = ComponentAdapter(noOfBogie, onPassSave = {editText, data, pos ->
+
+                    val componentEntry = componentEntryList[pos]
+                    //val qty = componentEntry.component?.qty
+                    //val max = noOfBogie * qty!!
+
+                    componentEntry.pass = data
+
+                    /*if(data <= max){
+                        componentEntry.fail = max - data
+                        if(!binding.rvComponentData.isComputingLayout){
+                            adapter.notifyItemChanged(pos)
+                            editText.setSelection(data.toString().length)
+                        }
+                    }*/
+
+                }, onFailSave = {editText, data, pos ->
+
+                    val componentEntry = componentEntryList[pos]
+                    //val qty = componentEntry.component?.qty
+                    //val max = noOfBogie * qty!!
+
+                    componentEntry.fail = data
+
+                    /*if(data <= max){
+                        componentEntry.pass = max - data
+                        if(!binding.rvComponentData.isComputingLayout) {
+                            adapter.notifyItemChanged(pos)
+                            editText.setSelection(data.toString().length)
+                        }
+                    }*/
                 })
 
                 binding.rvComponentData.adapter = adapter

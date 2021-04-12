@@ -8,4 +8,5 @@
     <string name="fail">Fail</string>
     <string name="please_fill_data_below_and_save">Please fill data below and Save.</string>
     <string name="btn_continue">Continue</string>
+    <string name="viewData">View Data</string>
 </resources>

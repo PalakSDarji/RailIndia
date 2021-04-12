@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
@@ -17,7 +18,7 @@ import com.palak.railindia.model.ComponentEntry
 /**
  * An adapter to load CityLocation list.
  */
-class ComponentAdapter(var noOfBogie : Int, var onPassSave : (Int, Int) -> Unit, var onFailSave : (Int, Int) -> Unit) :
+class ComponentAdapter(var noOfBogie : Int, var onPassSave : (EditText, Int, Int) -> Unit, var onFailSave : (EditText, Int, Int) -> Unit) :
     ListAdapter<Any, RecyclerView.ViewHolder>(StringDataDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComponentViewHolder {
@@ -34,19 +35,26 @@ class ComponentAdapter(var noOfBogie : Int, var onPassSave : (Int, Int) -> Unit,
         holder.bind(getItem(position) as ComponentEntry)
     }
 
-    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, var onPassSave : (Int, Int) -> Unit,
-                              var onFailSave : (Int, Int) -> Unit) :
+    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, var onPassSave : (EditText, Int, Int) -> Unit,
+                              var onFailSave : (EditText, Int, Int) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(componentEntry: ComponentEntry) {
             with(binding) {
                 binding.bogieNo = noOfBogie
-                binding.component = componentEntry.component
+                binding.componentEntry = componentEntry
                 binding.tilPass.editText?.addTextChangedListener {
-                    onPassSave(it.toString().trim().toInt(), adapterPosition)
+                    val valInStr = it.toString().trim()
+                    if(valInStr.isNotEmpty()){
+                        onPassSave(binding.tilPass.editText!!,valInStr.toInt(), adapterPosition)
+                    }
                 }
                 binding.tilFail.editText?.addTextChangedListener {
-                    onFailSave(it.toString().trim().toInt(), adapterPosition)
+                    val valInStr = it.toString().trim()
+                    if(valInStr.isNotEmpty()){
+                        onFailSave(binding.tilFail.editText!!, valInStr.toInt(), adapterPosition)
+                    }
+
                 }
                 executePendingBindings()
             }

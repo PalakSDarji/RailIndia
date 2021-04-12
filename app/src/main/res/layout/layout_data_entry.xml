@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
         <variable
             name="bogieNo"
             type="Integer" />
+
         <variable
-            name="component"
-            type="com.palak.railindia.model.Component" />
+            name="componentEntry"
+            type="com.palak.railindia.model.ComponentEntry" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -21,7 +23,7 @@
             android:id="@+id/tvComponentName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{component.name + ` (` + component.id + `)`}"
+            android:text="@{componentEntry.component.name + ` (` + componentEntry.component.id + `)`}"
             android:textColor="@color/purple_700"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -36,10 +38,10 @@
             android:id="@+id/tvComponentQty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{`Qty : ` + component.qty}"
+            android:layout_marginEnd="15dp"
+            android:text="@{`Qty : ` + componentEntry.component.qty}"
             android:textColor="@color/purple_700"
             android:textSize="13sp"
-            android:layout_marginEnd="15dp"
             android:textStyle="normal"
             app:layout_constraintEnd_toStartOf="@+id/tvComponentMaxQty"
             app:layout_constraintStart_toEndOf="@id/tvComponentName"
@@ -51,7 +53,7 @@
             android:id="@+id/tvComponentMaxQty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{`Max : ` + Math.multiplyExact(component.qty,bogieNo)}"
+            android:text="@{`Max : ` + Math.multiplyExact(componentEntry.component.qty,bogieNo)}"
             android:textColor="@color/purple_700"
             android:textSize="13sp"
             android:textStyle="normal"
@@ -77,12 +79,11 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
                 android:inputType="number"
-                android:outlineProvider="bounds" />
+                android:outlineProvider="bounds"
+                android:textSize="15sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
-
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/tilFail"
@@ -100,9 +101,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="15sp"
                 android:inputType="number"
-                android:outlineProvider="bounds" />
+                android:outlineProvider="bounds"
+                android:textSize="15sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
