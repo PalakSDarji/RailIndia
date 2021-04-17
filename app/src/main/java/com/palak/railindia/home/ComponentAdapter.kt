@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
@@ -18,7 +19,12 @@ import com.palak.railindia.model.ComponentEntry
 /**
  * An adapter to load CityLocation list.
  */
-class ComponentAdapter(var noOfBogie : Int, var onPassSave : (EditText, Int, Int) -> Unit, var onFailSave : (EditText, Int, Int) -> Unit) :
+class ComponentAdapter(
+    var noOfBogie: Int,
+    val listSize: Int,
+    var onPassSave: (EditText, Int, Int) -> Unit,
+    var onFailSave: (EditText, Int, Int) -> Unit
+) :
     ListAdapter<Any, RecyclerView.ViewHolder>(StringDataDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComponentViewHolder {
@@ -27,7 +33,7 @@ class ComponentAdapter(var noOfBogie : Int, var onPassSave : (EditText, Int, Int
             DataBindingUtil.inflate(
                 LayoutInflater.from(parent.context),
                 R.layout.layout_data_entry, parent, false
-            ),noOfBogie, onPassSave, onFailSave)
+            ),noOfBogie, listSize, onPassSave, onFailSave)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -35,7 +41,7 @@ class ComponentAdapter(var noOfBogie : Int, var onPassSave : (EditText, Int, Int
         holder.bind(getItem(position) as ComponentEntry)
     }
 
-    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, var onPassSave : (EditText, Int, Int) -> Unit,
+    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, val listSize : Int, var onPassSave : (EditText, Int, Int) -> Unit,
                               var onFailSave : (EditText, Int, Int) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
@@ -55,6 +61,13 @@ class ComponentAdapter(var noOfBogie : Int, var onPassSave : (EditText, Int, Int
                         onFailSave(binding.tilFail.editText!!, valInStr.toInt(), adapterPosition)
                     }
 
+                }
+                if(adapterPosition == listSize - 1){
+                    //last item.
+                    binding.tilFail.editText?.imeOptions = EditorInfo.IME_ACTION_DONE
+                }
+                else{
+                    binding.tilFail.editText?.imeOptions = EditorInfo.IME_ACTION_NEXT
                 }
                 executePendingBindings()
             }

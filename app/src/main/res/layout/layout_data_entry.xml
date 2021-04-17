@@ -71,6 +71,7 @@
             android:layout_marginEnd="5dp"
             android:layout_marginBottom="10dp"
             android:hint="@string/pass"
+            android:nextFocusDown="@id/tilFail"
             app:layout_constraintEnd_toStartOf="@+id/tilFail"
             app:layout_constraintHorizontal_chainStyle="packed"
             app:layout_constraintStart_toStartOf="parent"
@@ -79,6 +80,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:imeOptions="actionNext"
                 android:inputType="number"
                 android:outlineProvider="bounds"
                 android:textSize="15sp" />
@@ -102,6 +104,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
+                android:imeOptions="actionNext"
                 android:outlineProvider="bounds"
                 android:textSize="15sp" />
 

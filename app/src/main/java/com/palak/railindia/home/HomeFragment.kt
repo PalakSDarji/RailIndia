@@ -11,7 +11,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
-import com.palak.railindia.R
 import com.palak.railindia.databinding.HomeFragmentBinding
 import com.palak.railindia.di.DateSDF
 import com.palak.railindia.model.ComponentEntry
@@ -182,7 +181,7 @@ class HomeFragment : Fragment() {
                     noOfBogie = bogieNumberText.toInt()
                 }
 
-                adapter = ComponentAdapter(noOfBogie, onPassSave = {editText, data, pos ->
+                adapter = ComponentAdapter(noOfBogie, componentEntryList.size, onPassSave = {editText, data, pos ->
 
                     val componentEntry = componentEntryList[pos]
                     //val qty = componentEntry.component?.qty
@@ -198,7 +197,7 @@ class HomeFragment : Fragment() {
                         }
                     }*/
 
-                }, onFailSave = {editText, data, pos ->
+                }) { editText, data, pos ->
 
                     val componentEntry = componentEntryList[pos]
                     //val qty = componentEntry.component?.qty
@@ -213,7 +212,7 @@ class HomeFragment : Fragment() {
                             editText.setSelection(data.toString().length)
                         }
                     }*/
-                })
+                }
 
                 binding.rvComponentData.adapter = adapter
                 binding.rvComponentData.addItemDecoration(
