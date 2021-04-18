@@ -53,6 +53,13 @@ class AppModule {
 
     @Singleton
     @Provides
+    @EntryDataRef
+    fun provideFirebaseDatabaseEntryDataRef(firebaseDatabase: FirebaseDatabase) : DatabaseReference {
+        return firebaseDatabase.getReference("entryData")
+    }
+
+    @Singleton
+    @Provides
     @DateSDF
     fun provideSdfTime() : SimpleDateFormat {
         return SimpleDateFormat("dd MMM yyyy")
@@ -63,6 +70,10 @@ class AppModule {
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class ComponentDataRef
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class EntryDataRef
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)

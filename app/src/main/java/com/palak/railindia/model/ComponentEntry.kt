@@ -6,7 +6,6 @@ import androidx.room.*
     tableName = "component_entry", foreignKeys = [
         ForeignKey(entity = Entry::class, parentColumns = ["id"], childColumns = ["entryId"]),
         ForeignKey(entity = Component::class, parentColumns = ["id"], childColumns = ["componentId"]),
-
     ]
 )
 data class ComponentEntry(

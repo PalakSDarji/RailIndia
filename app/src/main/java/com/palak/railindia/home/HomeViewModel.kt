@@ -32,8 +32,8 @@ class HomeViewModel @Inject constructor(
         }
 
     fun downloadComponentData() {
-        val getComponentData =
-            OneTimeWorkRequest.Builder(GetComponentDataWorker::class.java).build()
+        val getComponentData = OneTimeWorkRequest.Builder(GetComponentDataWorker::class.java)
+            .build()
         WorkManager.getInstance(app).enqueue(getComponentData)
     }
 
@@ -47,11 +47,19 @@ class HomeViewModel @Inject constructor(
                     it.entryId = entryId.toInt()
                     entryRepo.insertComponentEntry(it)
                 }
+
+                uploadEntries()
             }
 
             job.await()
         } catch (e: Exception) {
             throw e
         }
+    }
+
+    fun uploadEntries() {
+
+        val uploadEntryDataWorker = OneTimeWorkRequest.Builder(UploadEntryDataWorker::class.java).build()
+        WorkManager.getInstance(app).enqueue(uploadEntryDataWorker)
     }
 }

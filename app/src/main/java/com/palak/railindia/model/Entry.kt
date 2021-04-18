@@ -10,6 +10,8 @@ data class Entry(
     var id: Int = 0,
     @TypeConverters(Converters::class)
     var date: Date? = null,
+    var assignedToSync : Boolean? = false,
+    var synced : Boolean? = false,
     @Ignore
     var componentEntry: List<ComponentEntry>? = null
 )

@@ -24,4 +24,10 @@ class EntryRepo @Inject constructor(val entryDao: EntryDao) : Repo<Entry> {
             entryDao.insertComponentEntry(componentEntry)
         }
     }
+
+    fun fetchEntriesToSync() : Flow<List<Entry>> = entryDao.fetchEntriesToSync()
+
+    fun fetchComponentEntry(entryId : Int) = entryDao.fetchComponentEntryFromEntryId(entryId)
+
+    fun updateEntry(entry: Entry) = entryDao.updateEntry(entry)
 }

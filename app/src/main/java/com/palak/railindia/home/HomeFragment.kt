@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.lang.Exception
+import java.lang.RuntimeException
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
@@ -123,6 +124,11 @@ class HomeFragment : Fragment() {
                     }
                 }
             }
+        }
+
+        binding.btnViewData.setOnClickListener {
+
+            viewModel.uploadEntries()
         }
     }
 
