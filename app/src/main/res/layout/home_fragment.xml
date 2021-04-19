@@ -102,7 +102,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginTop="15dp"
-                    android:background="#aaa"
+                    android:background="@color/grey_aaa"
                     app:layout_constraintTop_toBottomOf="@+id/layoutBogie" />
 
                 <TextView
@@ -112,7 +112,7 @@
                     android:layout_height="wrap_content"
                     android:layout_margin="10dp"
                     android:text="@string/please_fill_data_below_and_save"
-                    android:textColor="#888"
+                    android:textColor="@color/grey_888"
                     android:textSize="13sp"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/viewSpace1" />

@@ -19,4 +19,8 @@ class ComponentRepo @Inject constructor(val componentDao: ComponentDao) : Repo<C
             componentDao.insertComponent(component)
         }
     }
+
+    override suspend fun updateIntoDb(t: Component) {
+        //No need.
+    }
 }

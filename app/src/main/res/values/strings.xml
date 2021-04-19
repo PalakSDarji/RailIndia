@@ -9,4 +9,8 @@
     <string name="please_fill_data_below_and_save">Please fill data below and Save.</string>
     <string name="btn_continue">Continue</string>
     <string name="viewData">View Data</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="go_back_ask">You will lose your changes. Please save your work first.</string>
+    <string name="exit">Exit</string>
+    <string name="cancel">Cancel</string>
 </resources>
