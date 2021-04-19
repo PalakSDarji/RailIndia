@@ -29,5 +29,9 @@ class EntryRepo @Inject constructor(val entryDao: EntryDao) : Repo<Entry> {
 
     fun fetchComponentEntry(entryId : Int) = entryDao.fetchComponentEntryFromEntryId(entryId)
 
-    fun updateEntry(entry: Entry) = entryDao.updateEntry(entry)
+    override suspend fun updateIntoDb(entry: Entry) {
+        withContext(Dispatchers.IO){
+            entryDao.updateEntry(entry)
+        }
+    }
 }

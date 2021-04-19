@@ -47,44 +47,51 @@ public class UploadEntryDataWorker
                     list.forEach { entry ->
                         Timber.d("Fetched entry : $entry")
 
+                        //Pretty print date format in String to make it human readable even on firebase.
                         val dateInStr = dateSdf.format(entry.date!!.time)
 
+                        //Fetch component list from local db. We will need it later to extract
+                        // component name.
                         entry.componentEntry = entryRepo.fetchComponentEntry(entry.id)
+
                         Timber.d("Uploading entry : $entry")
 
-                        //set synced flag to true and update in local.
+                        //Set assignedToSync flag to true and update in local to indicate that this
+                        // item is already picked for syncing. So in next sync process, we can leave
+                        // it from syncing again.
                         entry.assignedToSync = true
-                        entryRepo.updateEntry(entry)
+                        entryRepo.updateIntoDb(entry)
 
-                        val firebaseComponentEntryList = entry.componentEntry!!.map { ce ->
-                            FirebaseComponentEntry(ce.id, ce.pass, ce.fail)
-                        }
-
-                        val firebaseEntry = FirebaseEntry(
-                            entry.id,
-                            dateInStr
-                        )
-
+                        //Sync entry first.
+                        val firebaseEntry = FirebaseEntry(entry.id, dateInStr, entry.qty)
                         entryDataRef.child(dateInStr).setValue(firebaseEntry)
 
-                        firebaseComponentEntryList.forEach { firebaseComponentEntry ->
+                        //Sync entry's component list one by one. but before that, retrieve
+                        // component name from component list.
+                        entry.componentEntry?.map { ce ->
 
-                            firebaseComponentEntry.componentName =
-                                componentList.filter { component ->
-                                    component.id == firebaseComponentEntry.id
-                                }.map {
-                                    it.name
-                                }.first()
+                            val compName = componentList.filter { component ->
+                                component.id == ce.componentId
+                            }.map { component ->
+                                component.name
+                            }.single()
 
-                            Timber.d("Syncing FirebaseComponentEntry : $firebaseComponentEntry")
+                            //Wrap inside custom type to sync on firebase and return.
+                            FirebaseComponentEntry(ce.id, ce.pass, ce.fail, compName).also {
 
-                            entryDataRef.child(dateInStr).child(firebaseComponentEntry.id.toString())
-                                .setValue(firebaseComponentEntry)
+                                Timber.d("Syncing FirebaseComponentEntry : $it")
+
+                                entryDataRef.child(dateInStr)
+                                    .child(it.id.toString())
+                                    .setValue(it)
+                            }
                         }
 
-                        Timber.d("Now Set Synced to true")
+                        //Set sync flag to true to make them finally synced.
                         entry.synced = true
-                        entryRepo.updateEntry(entry)
+                        entryRepo.updateIntoDb(entry)
+
+                        Timber.d("Synced data for ${firebaseEntry.date} successfully!")
                     }
                 }
             }

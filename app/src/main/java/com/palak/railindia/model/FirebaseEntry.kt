@@ -1,11 +1,9 @@
 package com.palak.railindia.model
 
-import java.sql.Date
-
-
 data class FirebaseEntry(
     val id : Int,
-    val date : String
+    val date : String,
+    val totalQty : Int
 )
 
 data class FirebaseComponentEntry(

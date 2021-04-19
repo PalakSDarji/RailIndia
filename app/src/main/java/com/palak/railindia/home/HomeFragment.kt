@@ -114,6 +114,7 @@ class HomeFragment : Fragment() {
                 lifecycleScope.launch {
 
                     try{
+                        entry.qty = noOfBogie
                         viewModel.saveEntry(entry)
                         Snackbar.make(binding.container,"Data Added Successfully!", Snackbar.LENGTH_LONG).show()
                         initViews()
