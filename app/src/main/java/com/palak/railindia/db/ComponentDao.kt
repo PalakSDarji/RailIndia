@@ -20,6 +20,9 @@ interface ComponentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertComponent(component : Component) : Long
+
+    @Query("SELECT * FROM component WHERE id = :id")
+    suspend fun getComponentFromId(id : Int) : Component
 /*
     @Query("DELETE FROM cityLocation WHERE id = :id")
     suspend fun deleteCityLocation(id: Int)

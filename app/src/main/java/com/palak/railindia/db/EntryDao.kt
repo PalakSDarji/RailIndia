@@ -21,7 +21,7 @@ interface EntryDao {
     suspend fun insertComponentEntry(componentEntry: ComponentEntry) : Long
 
     @Query("SELECT * FROM component_entry WHERE entryId = :entryId ORDER BY id")
-    fun fetchComponentEntryFromEntryId(entryId : Int) : List<ComponentEntry>
+    fun fetchComponentEntryFromEntryId(entryId : String) : List<ComponentEntry>
 
     @Update
     fun updateEntry(entry: Entry)

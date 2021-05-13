@@ -6,8 +6,8 @@ import java.sql.Date
 
 @Entity(tableName = "entry")
 data class Entry(
-    @PrimaryKey(autoGenerate = true)
-    var id: Int = 0,
+    @PrimaryKey
+    var id: String = "",
     @TypeConverters(Converters::class)
     var date: Date? = null,
     var assignedToSync : Boolean? = false,

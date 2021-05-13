@@ -27,6 +27,9 @@ class ComponentAdapter(
 ) :
     ListAdapter<Any, RecyclerView.ViewHolder>(StringDataDiffCallback()) {
 
+    override fun getItemCount(): Int {
+        return listSize
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComponentViewHolder {
 
         return ComponentViewHolder(

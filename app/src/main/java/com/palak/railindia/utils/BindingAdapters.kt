@@ -1,6 +1,7 @@
 package com.palak.railindia.utils
 
 import android.view.View
+import android.widget.TextView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
@@ -28,6 +29,13 @@ fun setDateToEditText(et : TextInputEditText, date : Date?){
     val newDate : String = SimpleDateFormat("dd MMM yyyy").format(date)
     if(et.text?.equals(newDate) == false){
         et.setText(newDate)
+    }
+}
+
+@BindingAdapter("setQty")
+fun bindPassFailText(view : TextView, qty : Int){
+    if(qty > 0) {
+        view.text = qty.toString()
     }
 }
 

@@ -13,4 +13,6 @@
     <string name="go_back_ask">You will lose your changes. Please save your work first.</string>
     <string name="exit">Exit</string>
     <string name="cancel">Cancel</string>
+    <string name="search_data">Search Data</string>
+    <string name="update_data">Update Data</string>
 </resources>

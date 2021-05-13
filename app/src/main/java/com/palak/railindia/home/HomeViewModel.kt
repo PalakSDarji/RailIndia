@@ -6,13 +6,19 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
+import com.palak.railindia.di.EntryDataRef
 import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.model.Component
 import com.palak.railindia.model.Entry
 import com.palak.railindia.repo.EntryRepo
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.*
+import timber.log.Timber
 import java.lang.NumberFormatException
 import java.util.*
 import javax.inject.Inject
@@ -37,14 +43,14 @@ class HomeViewModel @Inject constructor(
         WorkManager.getInstance(app).enqueue(getComponentData)
     }
 
-    suspend fun saveEntry(entry: Entry){
+    suspend fun saveEntry(entry: Entry) {
 
         try {
             val job = viewModelScope.async {
-                val entryId = entryRepo.insertIntoDb(entry)
+                entryRepo.insertIntoDb(entry)
 
                 entry.componentEntry?.forEach {
-                    it.entryId = entryId.toInt()
+                    it.entryId = entry.id
                     entryRepo.insertComponentEntry(it)
                 }
 
@@ -59,7 +65,10 @@ class HomeViewModel @Inject constructor(
 
     fun uploadEntries() {
 
-        val uploadEntryDataWorker = OneTimeWorkRequest.Builder(UploadEntryDataWorker::class.java).build()
+        val uploadEntryDataWorker =
+            OneTimeWorkRequest.Builder(UploadEntryDataWorker::class.java).build()
         WorkManager.getInstance(app).enqueue(uploadEntryDataWorker)
     }
+
+    suspend fun searchByDate(dateInStr: String) = entryRepo.searchByDate(dateInStr)
 }

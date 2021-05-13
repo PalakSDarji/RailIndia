@@ -82,6 +82,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/grey_333"
                 android:imeOptions="actionNext"
+                setQty="@{componentEntry.pass}"
                 android:inputType="number"
                 android:outlineProvider="bounds"
                 android:textSize="15sp" />
@@ -106,6 +107,7 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:imeOptions="actionNext"
+                setQty="@{componentEntry.fail}"
                 android:outlineProvider="bounds"
                 android:textColor="@color/grey_333"
                 android:textSize="15sp" />

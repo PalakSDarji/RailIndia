@@ -23,6 +23,7 @@ import com.palak.railindia.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -54,6 +55,8 @@ class HomeFragment : Fragment() {
 
     var cal = Calendar.getInstance()
 
+    var isInSearchMode: Boolean = false
+
     val dateSetListener =
         DatePickerDialog.OnDateSetListener { view, year, monthOfYear, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
@@ -82,57 +85,12 @@ class HomeFragment : Fragment() {
         binding.homeViewModel = viewModel
 
         binding.layoutDate.tilDate.editText?.setOnClickListener {
-            DatePickerDialog(
-                requireContext(),
-                dateSetListener,
-                cal.get(Calendar.YEAR),
-                cal.get(Calendar.MONTH),
-                cal.get(Calendar.DAY_OF_MONTH)
-            ).show()
+            showDialogPicker()
         }
 
         binding.btnContinue.setOnClickListener {
 
-            hideKeyboard()
-            val date = binding.layoutDate.tilDate.editText?.text.toString().trim()
-            if (date.isEmpty()) {
-                Snackbar.make(binding.container, "Enter date!", Snackbar.LENGTH_LONG).show()
-                return@setOnClickListener
-            }
-
-            val boggieNumber = binding.layoutBogie.tilBogieNumber.editText?.text.toString()
-            if (boggieNumber.isNotEmpty() && boggieNumber.toInt() > 100) {
-                Snackbar.make(
-                    binding.container,
-                    "You can not select more than 100 boggie!",
-                    Snackbar.LENGTH_LONG
-                ).show()
-                return@setOnClickListener
-            }
-
-            binding.layoutDate.tilDate.isEnabled = false
-
-            if (binding.layoutBogie.tilBogieNumber.editText?.text.toString().isEmpty()) {
-                binding.layoutBogie.tilBogieNumber.editText?.setText("1")
-            }
-
-            binding.layoutBogie.tilBogieNumber.isEnabled = false
-            binding.showList = true
-            initList()
-
-            requireActivity().onBackPressedDispatcher.addCallback(
-                viewLifecycleOwner,
-                object : OnBackPressedCallback(true) {
-                    override fun handleOnBackPressed() {
-                        if (askForBackPress) {
-                            showBackConfirmationDialog()
-                        } else {
-                            isEnabled = false
-                            requireActivity().onBackPressed()
-                        }
-                    }
-
-                })
+            loadView()
         }
 
         binding.btnAddData.setOnClickListener {
@@ -165,9 +123,82 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.btnViewData.setOnClickListener {
-            Snackbar.make(binding.container, "Feature pending!", Snackbar.LENGTH_LONG).show()
+        binding.btnSearchData.setOnClickListener {
+            isInSearchMode = true
+            showDialogPicker()
         }
+    }
+
+    private fun loadView() {
+
+        hideKeyboard()
+        val date = binding.layoutDate.tilDate.editText?.text.toString().trim()
+        if (date.isEmpty()) {
+            Snackbar.make(binding.container, "Enter date!", Snackbar.LENGTH_LONG).show()
+            return
+        }
+
+        val boggieNumber = binding.layoutBogie.tilBogieNumber.editText?.text.toString()
+        if (boggieNumber.isNotEmpty() && boggieNumber.toInt() > 100) {
+            Snackbar.make(
+                binding.container,
+                "You can not select more than 100 boggie!",
+                Snackbar.LENGTH_LONG
+            ).show()
+            return
+        }
+
+        binding.layoutDate.tilDate.isEnabled = false
+
+        if (binding.layoutBogie.tilBogieNumber.editText?.text.toString().isEmpty()) {
+            binding.layoutBogie.tilBogieNumber.editText?.setText("1")
+        }
+
+        binding.layoutBogie.tilBogieNumber.isEnabled = false
+
+        binding.showList = true
+        setActionButtons(false)
+        initList()
+        setSubmitButton()
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (askForBackPress) {
+                        showBackConfirmationDialog()
+                    } else {
+                        isEnabled = false
+                        requireActivity().onBackPressed()
+                    }
+                }
+
+            })
+    }
+
+    private fun setSubmitButton() {
+
+        if(isInSearchMode){
+            binding.btnAddData.text = getString(R.string.update_data)
+        }
+        else{
+            binding.btnAddData.text = getString(R.string.add_data)
+        }
+    }
+
+    private fun setActionButtons(isSearching: Boolean) {
+        binding.isSearching = isSearching
+        binding.hideActionButtons = binding.showList as Boolean || binding.isSearching as Boolean
+    }
+
+    private fun showDialogPicker() {
+        DatePickerDialog(
+            requireContext(),
+            dateSetListener,
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
+        ).show()
     }
 
     private fun showBackConfirmationDialog() {
@@ -187,6 +218,7 @@ class HomeFragment : Fragment() {
     private fun initViews() {
 
         entry = Entry()
+        entry.id = UUID.randomUUID().toString()
         noOfBogie = 1
         binding.showList = false
 
@@ -219,81 +251,69 @@ class HomeFragment : Fragment() {
 
     private fun initList() {
 
-        lifecycleScope.launchWhenCreated {
+        if (isInSearchMode) {
+            entry.componentEntry?.let { initAdapter(it) }
+        } else {
+            lifecycleScope.launchWhenCreated {
 
-            viewModel.componentLiveData.map {
-                it.map {
-                    val ce = ComponentEntry()
-                    ce.componentId = it.id
-                    ce.component = it
-                    ce
+                viewModel.componentLiveData.map {
+                    it.map {
+                        val ce = ComponentEntry()
+                        ce.id = UUID.randomUUID().toString()
+                        ce.componentId = it.id
+                        ce.component = it
+                        ce
+                    }
+                }.distinctUntilChanged().collect { componentEntryList ->
+
+                    entry.componentEntry = componentEntryList
+
+                    Timber.d("printing flow $componentEntryList")
+
+                    val bogieNumberText =
+                        binding.layoutBogie.tilBogieNumber.editText?.text.toString()
+
+                    if (!bogieNumberText.isEmpty()) {
+                        noOfBogie = bogieNumberText.toInt()
+                    }
+
+                    initAdapter(componentEntryList)
+
+
                 }
-            }.distinctUntilChanged().collect { componentEntryList ->
-
-                entry.componentEntry = componentEntryList
-
-                Timber.d("printing flow $componentEntryList")
-
-                binding.rvComponentData.layoutManager = LinearLayoutManager(context)
-
-                val bogieNumberText = binding.layoutBogie.tilBogieNumber.editText?.text.toString()
-
-
-
-                if (!bogieNumberText.isEmpty()) {
-                    noOfBogie = bogieNumberText.toInt()
-                }
-
-                adapter = ComponentAdapter(
-                    noOfBogie,
-                    componentEntryList.size,
-                    onPassSave = { editText, data, pos ->
-
-                        val componentEntry = componentEntryList[pos]
-                        //val qty = componentEntry.component?.qty
-                        //val max = noOfBogie * qty!!
-
-                        componentEntry.pass = data
-
-                        /*if(data <= max){
-                            componentEntry.fail = max - data
-                            if(!binding.rvComponentData.isComputingLayout){
-                                adapter.notifyItemChanged(pos)
-                                editText.setSelection(data.toString().length)
-                            }
-                        }*/
-
-                    }) { editText, data, pos ->
-
-                    val componentEntry = componentEntryList[pos]
-                    //val qty = componentEntry.component?.qty
-                    //val max = noOfBogie * qty!!
-
-                    componentEntry.fail = data
-
-                    /*if(data <= max){
-                        componentEntry.pass = max - data
-                        if(!binding.rvComponentData.isComputingLayout) {
-                            adapter.notifyItemChanged(pos)
-                            editText.setSelection(data.toString().length)
-                        }
-                    }*/
-                }
-
-                binding.rvComponentData.adapter = adapter
-                binding.rvComponentData.addItemDecoration(
-                    DividerItemDecoration(
-                        context,
-                        DividerItemDecoration.VERTICAL
-                    )
-                )
-
-                binding.rvComponentData.isNestedScrollingEnabled = false
-                adapter.submitList(componentEntryList)
-
-                askForBackPress = true
             }
         }
+    }
+
+    private fun initAdapter(componentEntryList: List<ComponentEntry>) {
+
+        adapter = ComponentAdapter(
+            noOfBogie,
+            componentEntryList.size,
+            onPassSave = { editText, data, pos ->
+
+                val componentEntry = componentEntryList[pos]
+                componentEntry.pass = data
+
+            }, onFailSave = { editText, data, pos ->
+
+                val componentEntry = componentEntryList[pos]
+                componentEntry.fail = data
+
+            })
+
+        binding.rvComponentData.layoutManager = LinearLayoutManager(context)
+        binding.rvComponentData.adapter = adapter
+        binding.rvComponentData.addItemDecoration(
+            DividerItemDecoration(
+                context,
+                DividerItemDecoration.VERTICAL
+            )
+        )
+
+        binding.rvComponentData.isNestedScrollingEnabled = false
+        adapter.submitList(componentEntryList)
+        askForBackPress = true
     }
 
     private fun setDate() {
@@ -304,8 +324,49 @@ class HomeFragment : Fragment() {
         cal.set(Calendar.MILLISECOND, 0)
 
         viewModel.selectedDate = cal.time
-        binding.layoutDate.tilDate.editText?.setText(dateSdf.format(viewModel.selectedDate))
+
+        val dateFormated = dateSdf.format(viewModel.selectedDate)
+        binding.layoutDate.tilDate.editText?.setText(dateFormated)
 
         entry.date = Date(cal.time.time)
+
+        if (isInSearchMode) {
+            //Call API to check if data is available. if so, then loadView()
+            //isInSearchMode = false
+            setActionButtons(true)
+
+            lifecycleScope.launch {
+
+                viewModel.searchByDate(dateFormated).collect { result ->
+
+                    setActionButtons(false)
+
+                    when {
+                        result.isSuccess -> {
+
+                            val foundEntry = result.getOrNull()
+                            foundEntry?.let { e ->
+                                Timber.d("time to load entry :: $e")
+
+                                entry = foundEntry
+                                loadView()
+                            }
+                        }
+                        result.isFailure -> {
+                            Snackbar.make(
+                                binding.container,
+                                "${result.exceptionOrNull()?.message}",
+                                Snackbar.LENGTH_LONG
+                            ).show()
+
+                            result.exceptionOrNull()?.printStackTrace()
+                            initViews()
+                        }
+                    }
+                }
+            }
+
+
+        }
     }
 }

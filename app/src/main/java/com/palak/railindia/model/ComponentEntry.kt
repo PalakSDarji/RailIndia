@@ -9,9 +9,9 @@ import androidx.room.*
     ]
 )
 data class ComponentEntry(
-    @PrimaryKey(autoGenerate = true)
-    var id : Int = 0,
-    var entryId: Int = 0,
+    @PrimaryKey
+    var id : String = "",
+    var entryId: String = "",
     var componentId: Int = 0,
     var pass: Int = 0,
     var fail: Int = 0,

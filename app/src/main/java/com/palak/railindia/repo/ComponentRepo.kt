@@ -23,4 +23,10 @@ class ComponentRepo @Inject constructor(val componentDao: ComponentDao) : Repo<C
     override suspend fun updateIntoDb(t: Component) {
         //No need.
     }
+
+    suspend fun getComponentFromId(id : Int) : Component {
+        return withContext(Dispatchers.IO){
+            componentDao.getComponentFromId(id)
+        }
+    }
 }

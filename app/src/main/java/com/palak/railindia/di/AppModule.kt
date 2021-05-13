@@ -8,6 +8,9 @@ import com.google.firebase.ktx.Firebase
 import com.palak.railindia.db.AppDb
 import com.palak.railindia.db.ComponentDao
 import com.palak.railindia.db.EntryDao
+import com.palak.railindia.network.EntryService
+import com.palak.railindia.network.EntryServiceImpl
+import com.palak.railindia.repo.ComponentRepo
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -22,46 +25,56 @@ class AppModule {
 
     @Singleton
     @Provides
-    fun provideAppDb(application : Application) : AppDb {
+    fun provideAppDb(application: Application): AppDb {
         return AppDb.getDb(application.applicationContext)
     }
 
     @Singleton
     @Provides
-    fun provideComponentDao(appDb : AppDb) : ComponentDao {
+    fun provideComponentDao(appDb: AppDb): ComponentDao {
         return appDb.componentDao()
     }
 
     @Singleton
     @Provides
-    fun provideEntryDao(appDb: AppDb) : EntryDao {
+    fun provideEntryDao(appDb: AppDb): EntryDao {
         return appDb.entryDao()
     }
 
     @Singleton
     @Provides
-    fun provideFirebaseDatabase() : FirebaseDatabase {
+    fun provideEntryService(
+        @EntryDataRef databaseReference: DatabaseReference,
+        @DateSDF dateFormat: SimpleDateFormat, componentRepo: ComponentRepo
+    ): EntryService {
+
+        return EntryServiceImpl(databaseReference, dateFormat,componentRepo)
+    }
+
+    @Singleton
+    @Provides
+    fun provideFirebaseDatabase(): FirebaseDatabase {
         return Firebase.database
     }
 
     @Singleton
     @Provides
     @ComponentDataRef
-    fun provideFirebaseDatabaseComponentDataReference(firebaseDatabase: FirebaseDatabase) : DatabaseReference {
+    fun provideFirebaseDatabaseComponentDataReference(firebaseDatabase: FirebaseDatabase): DatabaseReference {
         return firebaseDatabase.getReference("componentData")
     }
 
     @Singleton
     @Provides
     @EntryDataRef
-    fun provideFirebaseDatabaseEntryDataRef(firebaseDatabase: FirebaseDatabase) : DatabaseReference {
+    fun provideFirebaseDatabaseEntryDataRef(firebaseDatabase: FirebaseDatabase): DatabaseReference {
         return firebaseDatabase.getReference("entryData")
     }
 
     @Singleton
     @Provides
     @DateSDF
-    fun provideSdfTime() : SimpleDateFormat {
+    fun provideSdfTime(): SimpleDateFormat {
         return SimpleDateFormat("dd MMM yyyy")
     }
 }

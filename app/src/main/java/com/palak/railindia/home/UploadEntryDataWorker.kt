@@ -77,11 +77,11 @@ public class UploadEntryDataWorker
                             }.single()
 
                             //Wrap inside custom type to sync on firebase and return.
-                            FirebaseComponentEntry(ce.id, ce.pass, ce.fail, compName).also {
+                            FirebaseComponentEntry(ce.id, ce.pass, ce.fail, compName, ce.componentId).also {
 
                                 Timber.d("Syncing FirebaseComponentEntry : $it")
 
-                                entryDataRef.child(dateInStr)
+                                entryDataRef.child(dateInStr).child("compEntry")
                                     .child(it.id.toString())
                                     .setValue(it)
                             }
