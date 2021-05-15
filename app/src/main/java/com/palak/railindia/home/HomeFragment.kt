@@ -19,6 +19,7 @@ import com.palak.railindia.databinding.HomeFragmentBinding
 import com.palak.railindia.di.DateSDF
 import com.palak.railindia.model.ComponentEntry
 import com.palak.railindia.model.Entry
+import com.palak.railindia.utils.HomeViewStatus
 import com.palak.railindia.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -78,6 +79,32 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initViews()
+        viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+
+        lifecycleScope.launchWhenCreated {
+            viewModel.homeViewStatusFlow.collect {
+                when(it){
+                    HomeViewStatus.Empty -> {
+                        askForBackPress = false
+                        binding.hideActionButtons = false
+                        binding.showList = false
+                        binding.isSearching = false
+                    }
+                    HomeViewStatus.ShowList -> {
+                        askForBackPress = true
+                        binding.hideActionButtons = true
+                        binding.showList = true
+                        binding.isSearching = false
+                    }
+                    HomeViewStatus.Searching -> {
+                        binding.hideActionButtons = true
+                        binding.showList = false
+                        binding.isSearching = true
+                    }
+
+                }
+            }
+        }
 
         viewModel.downloadComponentData()
 
@@ -119,6 +146,9 @@ class HomeFragment : Fragment() {
                             Snackbar.LENGTH_LONG
                         ).show()
                     }
+
+                    viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+
                 }
             }
         }
@@ -156,8 +186,9 @@ class HomeFragment : Fragment() {
 
         binding.layoutBogie.tilBogieNumber.isEnabled = false
 
-        binding.showList = true
-        setActionButtons(false)
+        viewModel.setHomeViewStatus(HomeViewStatus.ShowList)
+        //binding.showList = true
+        //setActionButtons(false)
         initList()
         setSubmitButton()
 
@@ -206,7 +237,10 @@ class HomeFragment : Fragment() {
         val builder = AlertDialog.Builder(requireContext())
         builder.setMessage(R.string.go_back_ask).setTitle(R.string.are_you_sure)
             .setPositiveButton(R.string.exit) { dialog, id ->
-                requireActivity().finish()
+
+                initViews()
+                viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+                //requireActivity().finish()
             }
             .setNegativeButton(R.string.cancel) { dialog, id ->
                 dialog.dismiss()
@@ -313,7 +347,6 @@ class HomeFragment : Fragment() {
 
         binding.rvComponentData.isNestedScrollingEnabled = false
         adapter.submitList(componentEntryList)
-        askForBackPress = true
     }
 
     private fun setDate() {
@@ -333,13 +366,14 @@ class HomeFragment : Fragment() {
         if (isInSearchMode) {
             //Call API to check if data is available. if so, then loadView()
             //isInSearchMode = false
-            setActionButtons(true)
+            //setActionButtons(true)
 
             lifecycleScope.launch {
 
+                viewModel.setHomeViewStatus(HomeViewStatus.Searching)
                 viewModel.searchByDate(dateFormated).collect { result ->
 
-                    setActionButtons(false)
+                    //setActionButtons(false)
 
                     when {
                         result.isSuccess -> {
@@ -360,9 +394,13 @@ class HomeFragment : Fragment() {
                             ).show()
 
                             result.exceptionOrNull()?.printStackTrace()
+                            viewModel.setHomeViewStatus(HomeViewStatus.Empty)
                             initViews()
                         }
                     }
+
+
+                    isInSearchMode = false
                 }
             }
 

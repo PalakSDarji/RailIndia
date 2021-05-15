@@ -15,6 +15,7 @@ import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.model.Component
 import com.palak.railindia.model.Entry
 import com.palak.railindia.repo.EntryRepo
+import com.palak.railindia.utils.HomeViewStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -28,6 +29,9 @@ class HomeViewModel @Inject constructor(
     val app: Application,
     componentRepo: ComponentRepo, private val entryRepo: EntryRepo
 ) : AndroidViewModel(app) {
+
+    private val homeViewStatusMutableFlow = MutableStateFlow<HomeViewStatus>(HomeViewStatus.Empty)
+    val homeViewStatusFlow : StateFlow<HomeViewStatus> = homeViewStatusMutableFlow
 
     val componentLiveData: Flow<List<Component>> = componentRepo.fetchAllFromDb()
 
@@ -70,5 +74,12 @@ class HomeViewModel @Inject constructor(
         WorkManager.getInstance(app).enqueue(uploadEntryDataWorker)
     }
 
-    suspend fun searchByDate(dateInStr: String) = entryRepo.searchByDate(dateInStr)
+    suspend fun searchByDate(dateInStr: String): Flow<Result<Entry>> {
+
+        return entryRepo.searchByDate(dateInStr)
+    }
+
+    fun setHomeViewStatus(homeViewStatus: HomeViewStatus){
+        homeViewStatusMutableFlow.value = homeViewStatus
+    }
 }
