@@ -1,25 +1,30 @@
 package com.palak.railindia.home
 
 import android.app.DatePickerDialog
-import android.content.DialogInterface
+import android.os.Build
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
+import com.kal.rackmonthpicker.RackMonthPicker
 import com.palak.railindia.R
 import com.palak.railindia.databinding.HomeFragmentBinding
+import com.palak.railindia.di.DateMonthSDF
 import com.palak.railindia.di.DateSDF
+import com.palak.railindia.di.MonthSDF
 import com.palak.railindia.model.ComponentEntry
 import com.palak.railindia.model.Entry
+import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.utils.HomeViewStatus
+import com.palak.railindia.utils.Utils
 import com.palak.railindia.utils.hideKeyboard
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -28,8 +33,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
-import java.lang.RuntimeException
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.*
@@ -47,6 +50,9 @@ class HomeFragment : Fragment() {
     private lateinit var binding: HomeFragmentBinding
     private val viewModel by activityViewModels<HomeViewModel>()
 
+    @Inject
+    lateinit var componentRepo: ComponentRepo
+
     private lateinit var entry: Entry
     private var noOfBogie: Int = 1
 
@@ -54,7 +60,17 @@ class HomeFragment : Fragment() {
     @DateSDF
     lateinit var dateSdf: SimpleDateFormat
 
+    @Inject
+    @MonthSDF
+    lateinit var monthSdf: SimpleDateFormat
+
+    @Inject
+    @DateMonthSDF
+    lateinit var dateMonthSdf: SimpleDateFormat
+
     var cal = Calendar.getInstance()
+
+    val isUnsupportedDevice by lazy { Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP }
 
     var isInSearchMode: Boolean = false
 
@@ -153,9 +169,48 @@ class HomeFragment : Fragment() {
             }
         }
 
+        binding.llExport.setOnClickListener {
+
+            hideKeyboard()
+            Timber.d("Export Clicked")
+            showMonthPicker()
+        }
+
         binding.btnSearchData.setOnClickListener {
             isInSearchMode = true
             showDialogPicker()
+        }
+    }
+
+    private fun searchMonth(time: java.util.Date) {
+
+        viewModel.setHomeViewStatus(HomeViewStatus.Searching)
+        lifecycleScope.launch {
+            val date = monthSdf.format(time)
+            viewModel.searchByMonth(date).collect { result ->
+                when {
+                    result.isSuccess -> {
+                        val list = result.getOrNull()
+                        list?.let {
+                            entryList ->
+                            val listOfComponents= componentRepo.fetchAllFromDb().first()
+                            Utils.createSpreadSheet(requireContext(),
+                                date, dateMonthSdf, entryList, isUnsupportedDevice, listOfComponents)
+                        }
+
+                    }
+                    result.isFailure -> {
+                        Snackbar.make(
+                            binding.container,
+                            "${result.exceptionOrNull()?.message}",
+                            Snackbar.LENGTH_LONG
+                        ).show()
+
+                        result.exceptionOrNull()?.printStackTrace()
+                    }
+                }
+                viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+            }
         }
     }
 
@@ -217,9 +272,17 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun setActionButtons(isSearching: Boolean) {
-        binding.isSearching = isSearching
-        binding.hideActionButtons = binding.showList as Boolean || binding.isSearching as Boolean
+    private fun showMonthPicker(){
+
+        RackMonthPicker(requireActivity()).setLocale(Locale.ENGLISH)
+            .setPositiveButton { month, startDate, endDate, year, monthLabel ->
+                val cal = Calendar.getInstance()
+                cal.set(Calendar.YEAR,year)
+                cal.set(Calendar.MONTH, month-1)
+                searchMonth(cal.time)
+            }.setNegativeButton {
+                it.dismiss()
+            }.show()
     }
 
     private fun showDialogPicker() {
@@ -362,6 +425,7 @@ class HomeFragment : Fragment() {
         binding.layoutDate.tilDate.editText?.setText(dateFormated)
 
         entry.date = Date(cal.time.time)
+        entry.month = monthSdf.format(entry.date)
 
         if (isInSearchMode) {
             //Call API to check if data is available. if so, then loadView()

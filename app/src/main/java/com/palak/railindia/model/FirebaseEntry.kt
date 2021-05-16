@@ -3,6 +3,7 @@ package com.palak.railindia.model
 data class FirebaseEntry(
     val id : String = "",
     val date : String = "",
+    val month : String = "",
     val totalQty : Int = 0
 )
 

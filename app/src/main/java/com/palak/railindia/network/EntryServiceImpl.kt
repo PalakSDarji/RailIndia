@@ -32,29 +32,8 @@ class EntryServiceImpl @Inject constructor(@EntryDataRef var entryDataRef: Datab
 
                 if(snapshot.exists()){
                     snapshot.children.forEach {
-                        val firebaseEntry = it.getValue(FirebaseEntry::class.java) as FirebaseEntry
-                        println("it : $it")
-                        println("firebaseEntry : $firebaseEntry")
-
-                        val list = mutableListOf<FirebaseComponentEntry>()
-                        it.child("compEntry").children.forEach {
-                            val c = it.getValue(FirebaseComponentEntry::class.java) as FirebaseComponentEntry
-                            list.add(c)
-                            println("FirebaseComponentEntry : $c")
-                        }
-
-                        val entry = Utils.convertFirebaseEntryToEntry(firebaseEntry, list ,dateSdf)
-
-                        runBlocking {
-                            entry.componentEntry?.forEach {
-                                it.component = componentRepo.getComponentFromId(it.componentId)
-                            }
-                        }
-
-                        this@callbackFlow.sendBlocking(Result.success(entry))
+                        this@callbackFlow.sendBlocking(Result.success(fetchDataFromSnapshot(it)))
                     }
-
-
                 }
                 else{
                     this@callbackFlow.sendBlocking(Result.failure(DateNotFoundException("Date not found in Database!")))
@@ -69,6 +48,64 @@ class EntryServiceImpl @Inject constructor(@EntryDataRef var entryDataRef: Datab
 
         awaitClose {
             entryDataRef.removeEventListener(postListener)
+        }
+    }
+
+    private fun fetchDataFromSnapshot(data : DataSnapshot): Entry {
+
+        val firebaseEntry = data.getValue(FirebaseEntry::class.java) as FirebaseEntry
+        println("data : $data")
+        println("firebaseEntry : $firebaseEntry")
+
+        val list = mutableListOf<FirebaseComponentEntry>()
+        data.child("compEntry").children.forEach {
+            val c = it.getValue(FirebaseComponentEntry::class.java) as FirebaseComponentEntry
+            list.add(c)
+            println("FirebaseComponentEntry : $c")
+        }
+
+        val entry = Utils.convertFirebaseEntryToEntry(firebaseEntry, list ,dateSdf)
+
+        runBlocking {
+            entry.componentEntry?.forEach {
+                it.component = componentRepo.getComponentFromId(it.componentId)
+            }
+        }
+
+        return entry
+
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun searchEntryForMonth(month: String) = callbackFlow<Result<List<Entry>>>{
+
+        val postValueListener = object : ValueEventListener{
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+
+                if(snapshot.exists()){
+
+                    val list = mutableListOf<Entry>()
+                    snapshot.children.forEach {
+                        list.add(fetchDataFromSnapshot(it))
+                    }
+
+                    this@callbackFlow.sendBlocking(Result.success(list))
+                }
+                else{
+                    this@callbackFlow.sendBlocking(Result.failure(DateNotFoundException("No entry for $month.")))
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                this@callbackFlow.sendBlocking(Result.failure(DateNotFoundException("Something is wrong while making network request. Please try later!")))
+            }
+        }
+
+        entryDataRef.orderByChild("month").equalTo(month).addListenerForSingleValueEvent(postValueListener)
+
+        awaitClose {
+            entryDataRef.removeEventListener(postValueListener)
         }
     }
 }

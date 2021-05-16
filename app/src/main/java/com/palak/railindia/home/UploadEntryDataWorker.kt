@@ -6,17 +6,19 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.database.DatabaseReference
 import com.palak.railindia.di.DateSDF
-import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.di.EntryDataRef
 import com.palak.railindia.model.FirebaseComponentEntry
 import com.palak.railindia.model.FirebaseEntry
+import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.repo.EntryRepo
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.lang.Exception
 import java.text.SimpleDateFormat
 import javax.inject.Inject
 
@@ -63,7 +65,7 @@ public class UploadEntryDataWorker
                         entryRepo.updateIntoDb(entry)
 
                         //Sync entry first.
-                        val firebaseEntry = FirebaseEntry(entry.id, dateInStr, entry.qty)
+                        val firebaseEntry = FirebaseEntry(entry.id, dateInStr, entry.month!!, entry.qty)
                         entryDataRef.child(dateInStr).setValue(firebaseEntry)
 
                         //Sync entry's component list one by one. but before that, retrieve

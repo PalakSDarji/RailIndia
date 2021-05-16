@@ -1,6 +1,9 @@
 package com.palak.railindia.model
 
-import androidx.room.*
+import androidx.room.Entity
+import androidx.room.Ignore
+import androidx.room.PrimaryKey
+import androidx.room.TypeConverters
 import com.palak.railindia.utils.Converters
 import java.sql.Date
 
@@ -10,6 +13,7 @@ data class Entry(
     var id: String = "",
     @TypeConverters(Converters::class)
     var date: Date? = null,
+    var month: String? = null,
     var assignedToSync : Boolean? = false,
     var synced : Boolean? = false,
     var qty : Int = 1,

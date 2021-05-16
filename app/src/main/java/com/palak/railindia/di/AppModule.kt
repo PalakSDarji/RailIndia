@@ -74,8 +74,22 @@ class AppModule {
     @Singleton
     @Provides
     @DateSDF
-    fun provideSdfTime(): SimpleDateFormat {
+    fun provideDateSdfTime(): SimpleDateFormat {
         return SimpleDateFormat("dd MMM yyyy")
+    }
+
+    @Singleton
+    @Provides
+    @MonthSDF
+    fun provideMonthSdfTime(): SimpleDateFormat {
+        return SimpleDateFormat("MMM yyyy")
+    }
+
+    @Singleton
+    @Provides
+    @DateMonthSDF
+    fun provideDateMonthSdfTime(): SimpleDateFormat {
+        return SimpleDateFormat("dd/MM")
     }
 }
 
@@ -91,3 +105,11 @@ annotation class EntryDataRef
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DateSDF
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class MonthSDF
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class DateMonthSDF

@@ -41,4 +41,10 @@ class EntryRepo @Inject constructor(val entryDao: EntryDao, val entryService: En
             entryService.searchEntryByDate(date)
         }
     }
+
+    suspend fun searchByMonth(month : String) : Flow<Result<List<Entry>>>{
+        return withContext(Dispatchers.IO){
+            entryService.searchEntryForMonth(month)
+        }
+    }
 }

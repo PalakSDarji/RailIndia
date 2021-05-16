@@ -2,25 +2,19 @@ package com.palak.railindia.home
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.viewModelScope
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
-import com.palak.railindia.di.EntryDataRef
-import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.model.Component
 import com.palak.railindia.model.Entry
+import com.palak.railindia.repo.ComponentRepo
 import com.palak.railindia.repo.EntryRepo
 import com.palak.railindia.utils.HomeViewStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
-import timber.log.Timber
-import java.lang.NumberFormatException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.*
 import javax.inject.Inject
 
@@ -77,6 +71,11 @@ class HomeViewModel @Inject constructor(
     suspend fun searchByDate(dateInStr: String): Flow<Result<Entry>> {
 
         return entryRepo.searchByDate(dateInStr)
+    }
+
+    suspend fun searchByMonth(monthInStr: String) : Flow<Result<List<Entry>>>{
+
+        return entryRepo.searchByMonth(monthInStr)
     }
 
     fun setHomeViewStatus(homeViewStatus: HomeViewStatus){

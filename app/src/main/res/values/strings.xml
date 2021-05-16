@@ -15,4 +15,5 @@
     <string name="cancel">Cancel</string>
     <string name="search_data">Search Data</string>
     <string name="update_data">Update Data</string>
+    <string name="str_export">Export</string>
 </resources>
