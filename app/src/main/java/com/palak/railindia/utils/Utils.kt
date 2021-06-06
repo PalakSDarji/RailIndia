@@ -62,6 +62,7 @@ class Utils {
             context: Context,
             month: String,
             dateMonthSdf: SimpleDateFormat,
+            timeStampSdf: SimpleDateFormat,
             entryList: List<Entry>,
             isUnsupportedDevice: Boolean,
             listOfComponent: List<Component>
@@ -161,8 +162,8 @@ class Utils {
             var fos: FileOutputStream? = null
             try {
                 val dir = File("//sdcard//Download//")
-
-                val file = File(dir, "RailComponents.xls")
+                val timeStamp = timeStampSdf.format(Date())
+                val file = File(dir, "RailComponents_$timeStamp.xls")
 
                 fos = FileOutputStream(file)
                 workbook.write(fos)

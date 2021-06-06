@@ -41,7 +41,7 @@ class EntryServiceImpl @Inject constructor(@EntryDataRef var entryDataRef: Datab
             }
 
             override fun onCancelled(error: DatabaseError) {
-                this@callbackFlow.sendBlocking(Result.failure(DateNotFoundException("Something is wrong while making network request. Please try later!")))
+                this@callbackFlow.sendBlocking(Result.failure(Exception("Something is wrong while making network request. Please try later!")))
             }
         }
         entryDataRef.orderByChild("date").equalTo(date).limitToFirst(1).addListenerForSingleValueEvent(postListener)

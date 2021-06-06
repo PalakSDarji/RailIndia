@@ -3,7 +3,6 @@ package com.palak.railindia.utils
 import android.view.View
 import android.widget.TextView
 import androidx.databinding.BindingAdapter
-import androidx.databinding.InverseBindingAdapter
 import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
 import java.util.*
@@ -32,12 +31,25 @@ fun setDateToEditText(et : TextInputEditText, date : Date?){
     }
 }
 
-@BindingAdapter("setQty")
+@BindingAdapter(value = ["bind:setQty","bind:isUpdate"], requireAll = true)
+fun bindPassFailText(view : TextView, qty : Int, isUpdate: Boolean){
+    if(isUpdate){
+        view.text = qty.toString()
+    }/*
+    else if(qty > 0){
+        view.text = qty.toString()
+    }
+    if(isUpdate && qty > 0) {
+        view.text = qty.toString()
+    }*/
+}
+
+/*@BindingAdapter("setQty")
 fun bindPassFailText(view : TextView, qty : Int){
     if(qty > 0) {
         view.text = qty.toString()
     }
-}
+}*/
 
 /*@InverseBindingAdapter(attribute = "date")
 fun getDateFromEditText(et : TextInputEditText, date: Date) : Date{

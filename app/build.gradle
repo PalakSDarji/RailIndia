@@ -106,5 +106,5 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$workmanager_version"
     implementation 'com.github.supercilex:poi-android:3.17'
     implementation 'com.github.kal72:RackMonthPicker:1.6.1'
-
+    implementation 'pub.devrel:easypermissions:3.0.0'
 }

@@ -73,6 +73,13 @@ class AppModule {
 
     @Singleton
     @Provides
+    @TimeStampSDF
+    fun provideTimeStampSdfTime(): SimpleDateFormat {
+        return SimpleDateFormat("dd_MM_yyyy_hh_mm_ss")
+    }
+
+    @Singleton
+    @Provides
     @DateSDF
     fun provideDateSdfTime(): SimpleDateFormat {
         return SimpleDateFormat("dd MMM yyyy")
@@ -113,3 +120,7 @@ annotation class MonthSDF
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class DateMonthSDF
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class TimeStampSDF

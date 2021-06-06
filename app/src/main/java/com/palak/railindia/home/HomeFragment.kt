@@ -15,11 +15,13 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.snackbar.Snackbar
 import com.kal.rackmonthpicker.RackMonthPicker
+import com.palak.railindia.MainActivity
 import com.palak.railindia.R
 import com.palak.railindia.databinding.HomeFragmentBinding
 import com.palak.railindia.di.DateMonthSDF
 import com.palak.railindia.di.DateSDF
 import com.palak.railindia.di.MonthSDF
+import com.palak.railindia.di.TimeStampSDF
 import com.palak.railindia.model.ComponentEntry
 import com.palak.railindia.model.Entry
 import com.palak.railindia.repo.ComponentRepo
@@ -68,6 +70,10 @@ class HomeFragment : Fragment() {
     @DateMonthSDF
     lateinit var dateMonthSdf: SimpleDateFormat
 
+    @Inject
+    @TimeStampSDF
+    lateinit var timeStampSdf: SimpleDateFormat
+
     var cal = Calendar.getInstance()
 
     val isUnsupportedDevice by lazy { Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP }
@@ -105,17 +111,20 @@ class HomeFragment : Fragment() {
                         binding.hideActionButtons = false
                         binding.showList = false
                         binding.isSearching = false
+                        binding.llExport.visibility = View.VISIBLE
                     }
                     HomeViewStatus.ShowList -> {
                         askForBackPress = true
                         binding.hideActionButtons = true
                         binding.showList = true
                         binding.isSearching = false
+                        binding.llExport.visibility = View.GONE
                     }
                     HomeViewStatus.Searching -> {
                         binding.hideActionButtons = true
                         binding.showList = false
                         binding.isSearching = true
+                        binding.llExport.visibility = View.GONE
                     }
 
                 }
@@ -133,7 +142,36 @@ class HomeFragment : Fragment() {
 
         binding.btnContinue.setOnClickListener {
 
-            loadView()
+            if(!validateDateBoggieInput()) return@setOnClickListener
+
+            lifecycleScope.launch {
+
+                viewModel.setHomeViewStatus(HomeViewStatus.Searching)
+
+                val dateFormatted = dateSdf.format(viewModel.selectedDate!!)
+                viewModel.searchByDate(dateFormatted).collect { result ->
+
+                    when {
+                        result.isSuccess -> {
+
+                            //If returned success means date is available. dont let user enter.
+                            Snackbar.make(
+                                binding.container,
+                                context?.getString(R.string.date_available) + dateFormatted,
+                                Snackbar.LENGTH_LONG
+                            ).show()
+
+                            viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+                        }
+                        result.isFailure -> {
+
+                            loadView()
+                        }
+                    }
+
+                    isInSearchMode = false
+                }
+            }
         }
 
         binding.btnAddData.setOnClickListener {
@@ -173,7 +211,10 @@ class HomeFragment : Fragment() {
 
             hideKeyboard()
             Timber.d("Export Clicked")
-            showMonthPicker()
+
+            (requireActivity() as MainActivity).downloadExcel{
+                showMonthPicker()
+            }
         }
 
         binding.btnSearchData.setOnClickListener {
@@ -195,7 +236,7 @@ class HomeFragment : Fragment() {
                             entryList ->
                             val listOfComponents= componentRepo.fetchAllFromDb().first()
                             Utils.createSpreadSheet(requireContext(),
-                                date, dateMonthSdf, entryList, isUnsupportedDevice, listOfComponents)
+                                date, dateMonthSdf,timeStampSdf, entryList, isUnsupportedDevice, listOfComponents)
                         }
 
                     }
@@ -214,13 +255,13 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun loadView() {
+    private fun validateDateBoggieInput() : Boolean{
 
         hideKeyboard()
         val date = binding.layoutDate.tilDate.editText?.text.toString().trim()
         if (date.isEmpty()) {
             Snackbar.make(binding.container, "Enter date!", Snackbar.LENGTH_LONG).show()
-            return
+            return false
         }
 
         val boggieNumber = binding.layoutBogie.tilBogieNumber.editText?.text.toString()
@@ -230,8 +271,13 @@ class HomeFragment : Fragment() {
                 "You can not select more than 100 boggie!",
                 Snackbar.LENGTH_LONG
             ).show()
-            return
+            return false
         }
+
+        return true
+    }
+
+    private fun loadView() {
 
         binding.layoutDate.tilDate.isEnabled = false
 
@@ -386,6 +432,7 @@ class HomeFragment : Fragment() {
 
         adapter = ComponentAdapter(
             noOfBogie,
+            isInSearchMode,
             componentEntryList.size,
             onPassSave = { editText, data, pos ->
 
@@ -428,16 +475,13 @@ class HomeFragment : Fragment() {
         entry.month = monthSdf.format(entry.date)
 
         if (isInSearchMode) {
+
             //Call API to check if data is available. if so, then loadView()
-            //isInSearchMode = false
-            //setActionButtons(true)
 
             lifecycleScope.launch {
 
                 viewModel.setHomeViewStatus(HomeViewStatus.Searching)
                 viewModel.searchByDate(dateFormated).collect { result ->
-
-                    //setActionButtons(false)
 
                     when {
                         result.isSuccess -> {
@@ -447,6 +491,7 @@ class HomeFragment : Fragment() {
                                 Timber.d("time to load entry :: $e")
 
                                 entry = foundEntry
+                                noOfBogie = foundEntry.qty
                                 loadView()
                             }
                         }

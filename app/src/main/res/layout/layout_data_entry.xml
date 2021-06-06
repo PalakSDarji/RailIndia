@@ -4,6 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <variable
+            name="isUpdate"
+            type="Boolean" />
 
         <variable
             name="bogieNo"
@@ -82,7 +85,8 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/grey_333"
                 android:imeOptions="actionNext"
-                setQty="@{componentEntry.pass}"
+                app:setQty="@{componentEntry.pass}"
+                app:isUpdate="@{isUpdate}"
                 android:inputType="number"
                 android:outlineProvider="bounds"
                 android:textSize="15sp" />
@@ -107,7 +111,8 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:imeOptions="actionNext"
-                setQty="@{componentEntry.fail}"
+                app:setQty="@{componentEntry.fail}"
+                app:isUpdate="@{isUpdate}"
                 android:outlineProvider="bounds"
                 android:textColor="@color/grey_333"
                 android:textSize="15sp" />

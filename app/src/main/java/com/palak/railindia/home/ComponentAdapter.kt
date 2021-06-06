@@ -1,7 +1,6 @@
 package com.palak.railindia.home
 
 import android.annotation.SuppressLint
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
@@ -10,7 +9,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-
+import androidx.recyclerview.widget.RecyclerView
 import com.palak.railindia.R
 import com.palak.railindia.databinding.LayoutDataEntryBinding
 import com.palak.railindia.model.Component
@@ -21,6 +20,7 @@ import com.palak.railindia.model.ComponentEntry
  */
 class ComponentAdapter(
     var noOfBogie: Int,
+    var isUpdate: Boolean,
     val listSize: Int,
     var onPassSave: (EditText, Int, Int) -> Unit,
     var onFailSave: (EditText, Int, Int) -> Unit
@@ -36,7 +36,7 @@ class ComponentAdapter(
             DataBindingUtil.inflate(
                 LayoutInflater.from(parent.context),
                 R.layout.layout_data_entry, parent, false
-            ),noOfBogie, listSize, onPassSave, onFailSave)
+            ),noOfBogie, isUpdate, listSize, onPassSave, onFailSave)
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
@@ -44,12 +44,14 @@ class ComponentAdapter(
         holder.bind(getItem(position) as ComponentEntry)
     }
 
-    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, val listSize : Int, var onPassSave : (EditText, Int, Int) -> Unit,
+    class ComponentViewHolder(val binding: LayoutDataEntryBinding, var noOfBogie : Int, val isSearch: Boolean,
+                              val listSize : Int, var onPassSave : (EditText, Int, Int) -> Unit,
                               var onFailSave : (EditText, Int, Int) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(componentEntry: ComponentEntry) {
             with(binding) {
+                binding.isUpdate = isSearch
                 binding.bogieNo = noOfBogie
                 binding.componentEntry = componentEntry
                 binding.tilPass.editText?.addTextChangedListener {

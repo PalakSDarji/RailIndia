@@ -16,4 +16,13 @@
     <string name="search_data">Search Data</string>
     <string name="update_data">Update Data</string>
     <string name="str_export">Export</string>
+    <string name="date_available">"You have already entered data for "</string>
+
+
+    <string name="rationale_storage">This app needs access to your storage so you can download Excel file.</string>
+    <string name="rationale_storage_contacts">This app needs access to your storage to download Excel file.</string>
+    <string name="returned_from_app_settings_to_activity">
+        Returned from app settings to MainActivity with the following permissions: Storage
+    </string>
+    <string name="storage">Storage</string>
 </resources>
