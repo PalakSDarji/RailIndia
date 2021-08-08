@@ -1,6 +1,5 @@
 package com.palak.railindia.repo
 
-import androidx.lifecycle.LiveData
 import com.palak.railindia.db.ComponentDao
 import com.palak.railindia.model.Component
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +13,7 @@ class ComponentRepo @Inject constructor(val componentDao: ComponentDao) : Repo<C
         return componentDao.fetchAllComponent()
     }
 
-    override suspend fun insertIntoDb(component : Component): Long {
+    override suspend fun insertIntoDb(component : Component) {
         return withContext(Dispatchers.IO){
             componentDao.insertComponent(component)
         }

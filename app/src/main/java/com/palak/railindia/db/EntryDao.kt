@@ -17,6 +17,9 @@ interface EntryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEntry(entry: Entry) : Long
 
+    @Query("SELECT EXISTS(SELECT * FROM entry WHERE date = :date)")
+    suspend fun isEntryExists(date : Long) : Boolean
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertComponentEntry(componentEntry: ComponentEntry) : Long
 
@@ -25,4 +28,10 @@ interface EntryDao {
 
     @Update
     fun updateEntry(entry: Entry)
+
+    @Query("DELETE FROM entry WHERE date = :date")
+    fun deleteEntry(date: Long)
+
+    @Query("DELETE FROM component_entry WHERE entryId = :entryId")
+    fun deleteComponentEntry(entryId: String)
 }

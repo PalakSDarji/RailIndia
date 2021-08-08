@@ -154,14 +154,23 @@ class HomeFragment : Fragment() {
                     when {
                         result.isSuccess -> {
 
-                            //If returned success means date is available. dont let user enter.
+                            val foundEntry = result.getOrNull()
+                            foundEntry?.let { e ->
+                                Timber.d("time to load entry :: $e")
+                                isInSearchMode = true
+                                entry = foundEntry
+                                noOfBogie = foundEntry.qty
+                                loadView()
+                            }
+
+                            /*//If returned success means date is available. dont let user enter.
                             Snackbar.make(
                                 binding.container,
                                 context?.getString(R.string.date_available) + dateFormatted,
                                 Snackbar.LENGTH_LONG
                             ).show()
 
-                            viewModel.setHomeViewStatus(HomeViewStatus.Empty)
+                            viewModel.setHomeViewStatus(HomeViewStatus.Empty)*/
                         }
                         result.isFailure -> {
 
@@ -181,17 +190,29 @@ class HomeFragment : Fragment() {
 
             if (validate()) {
 
+                if(!Utils.isOnline(requireContext())){
+                    val builder = AlertDialog.Builder(requireContext())
+                    builder.setMessage(R.string.no_internet)
+                        .setPositiveButton(R.string.ok) { dialog, id ->
+                            dialog.dismiss()
+                        }
+                    // Create the AlertDialog object and return it
+                    builder.create().show()
+                    return@setOnClickListener
+                }
+
                 lifecycleScope.launch {
 
                     try {
                         entry.qty = noOfBogie
-                        viewModel.saveEntry(entry)
+                        viewModel.syncEntryToServer(entry)
                         Snackbar.make(
                             binding.container,
                             "Data Added Successfully!",
                             Snackbar.LENGTH_LONG
                         ).show()
                         initViews()
+                        viewModel.setHomeViewStatus(HomeViewStatus.Empty)
                     } catch (e: Exception) {
                         e.printStackTrace()
                         Snackbar.make(
@@ -200,8 +221,6 @@ class HomeFragment : Fragment() {
                             Snackbar.LENGTH_LONG
                         ).show()
                     }
-
-                    viewModel.setHomeViewStatus(HomeViewStatus.Empty)
 
                 }
             }
@@ -215,11 +234,6 @@ class HomeFragment : Fragment() {
             (requireActivity() as MainActivity).downloadExcel{
                 showMonthPicker()
             }
-        }
-
-        binding.btnSearchData.setOnClickListener {
-            isInSearchMode = true
-            showDialogPicker()
         }
     }
 

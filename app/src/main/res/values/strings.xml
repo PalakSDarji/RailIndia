@@ -11,6 +11,7 @@
     <string name="viewData">View Data</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="go_back_ask">You will lose your changes. Please save your work first.</string>
+    <string name="no_internet">Something\'s wrong with internet. Please check your connection</string>
     <string name="exit">Exit</string>
     <string name="cancel">Cancel</string>
     <string name="search_data">Search Data</string>

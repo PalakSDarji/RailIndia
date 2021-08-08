@@ -92,8 +92,8 @@ public class UploadEntryDataWorker
                         //Set sync flag to true to make them finally synced.
                         entry.synced = true
                         entryRepo.updateIntoDb(entry)
-
-                        Timber.d("Synced data for ${firebaseEntry.date} successfully!")
+                        //entryRepo.deleteEntry(entry)
+                        Timber.d("Synced data for ${entry.date} successfully!")
                     }
                 }
             }

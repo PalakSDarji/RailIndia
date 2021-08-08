@@ -14,9 +14,19 @@ class EntryRepo @Inject constructor(val entryDao: EntryDao, val entryService: En
         return entryDao.fetchAllFromDb()
     }
 
-    override suspend fun insertIntoDb(entry: Entry): Long {
+    override suspend fun insertIntoDb(entry: Entry) {
         return withContext(Dispatchers.IO){
-            entryDao.insertEntry(entry)
+            entry.date?.time?.let {
+                val exists = entryDao.isEntryExists(it)
+
+                if(exists){
+                    entry.assignedToSync = false
+                    entryDao.updateEntry(entry)
+                }
+                else{
+                    entryDao.insertEntry(entry)
+                }
+            }
         }
     }
 
@@ -45,6 +55,15 @@ class EntryRepo @Inject constructor(val entryDao: EntryDao, val entryService: En
     suspend fun searchByMonth(month : String) : Flow<Result<List<Entry>>>{
         return withContext(Dispatchers.IO){
             entryService.searchEntryForMonth(month)
+        }
+    }
+
+    suspend fun deleteEntry(entry: Entry){
+        withContext(Dispatchers.IO){
+            entry.componentEntry?.forEach { _ ->
+                entryDao.deleteComponentEntry(entry.id)
+            }
+            entryDao.deleteEntry(entry.date?.time!!)
         }
     }
 }
