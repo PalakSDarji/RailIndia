@@ -192,9 +192,11 @@ class Utils {
 
             var fos: FileOutputStream? = null
             try {
+                val newPath = context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                println("NewPATH: $newPath")
                 val dir = File("//sdcard//Download//")
                 val timeStamp = timeStampSdf.format(Date())
-                val file = File(dir, "RailComponents_$timeStamp.xls")
+                val file = File(newPath, "RailComponents_$timeStamp.xls")
 
                 fos = FileOutputStream(file)
                 workbook.write(fos)

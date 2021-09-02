@@ -296,7 +296,7 @@ class HomeFragment : Fragment() {
         binding.layoutDate.tilDate.isEnabled = false
 
         if (binding.layoutBogie.tilBogieNumber.editText?.text.toString().isEmpty()) {
-            binding.layoutBogie.tilBogieNumber.editText?.setText("1")
+            binding.layoutBogie.tilBogieNumber.editText?.setText(""+noOfBogie)
         }
 
         binding.layoutBogie.tilBogieNumber.isEnabled = false
